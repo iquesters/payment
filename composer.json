@@ -1,0 +1,108 @@
+{
+  "name": "iquesters/payment",
+  "description": "Payments for commerce orders: per-organisation payment methods (manual UPI with a QR for the exact amount, cash), proof of payment (UTR and screenshot), verification by admins. Gateways later.",
+  "keywords": [
+    "laravel",
+    "payment",
+    "upi",
+    "orders",
+    "iquesters"
+  ],
+  "type": "library",
+  "license": "MIT",
+  "homepage": "https://github.com/iquesters/payment",
+  "support": {
+    "issues": "https://github.com/iquesters/payment/issues",
+    "source": "https://github.com/iquesters/payment",
+    "docs": "https://github.com/iquesters/payment/tree/main/docs"
+  },
+  "authors": [
+    {
+      "name": "Pritam Bag",
+      "email": "pritam02b@gmail.com"
+    }
+  ],
+  "require": {
+    "php": "^8.3",
+    "laravel/framework": "^12.0|^13.0",
+    "iquesters/foundation": "^2.1",
+    "iquesters/user-interface": "^2.1",
+    "iquesters/organisation": "^2.1",
+    "iquesters/commerce": "^2.0",
+    "spatie/laravel-permission": "^8.0"
+  },
+  "require-dev": {
+    "orchestra/testbench": "^10.0|^11.0",
+    "laravel/sanctum": "^4.0",
+    "laravel/pint": "^1.18",
+    "larastan/larastan": "^3.0"
+  },
+  "repositories": [
+    {
+      "type": "path",
+      "url": "../foundation",
+      "options": {
+        "symlink": true,
+        "versions": {
+          "iquesters/foundation": "2.99.0"
+        }
+      }
+    },
+    {
+      "type": "path",
+      "url": "../user-interface",
+      "options": {
+        "symlink": true,
+        "versions": {
+          "iquesters/user-interface": "2.99.0"
+        }
+      }
+    },
+    {
+      "type": "path",
+      "url": "../organisation",
+      "options": {
+        "symlink": true,
+        "versions": {
+          "iquesters/organisation": "2.99.0"
+        }
+      }
+    },
+    {
+      "type": "path",
+      "url": "../commerce",
+      "options": {
+        "symlink": true,
+        "versions": {
+          "iquesters/commerce": "2.99.0"
+        }
+      }
+    }
+  ],
+  "scripts": {
+    "test": "phpunit",
+    "format": "pint",
+    "lint": "pint --test",
+    "analyse": "phpstan analyse --memory-limit=1G"
+  },
+  "autoload": {
+    "psr-4": {
+      "Iquesters\\Payment\\": "src/",
+      "Iquesters\\Payment\\Database\\Seeders\\": "database/seeders/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Iquesters\\Payment\\Tests\\": "tests/"
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Iquesters\\Payment\\PaymentServiceProvider"
+      ]
+    }
+  }
+}
