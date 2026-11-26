@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.0.0] – 2026-11-27
+
 ### Changed (the pay page)
 - **Payments list rows are cards** (record component `payment.summary`): the order, a **coloured status badge** (yellow *Waiting for verification*, green *Verified*, red *Rejected*), who paid, amount, UTR, when; a resend marked *2nd attempt*; a rejected one with *Rejected: {reason}*; a warning when the amount differs from the order. Waiting payments stay first. The seeder gives existing Payments tables the card (an admin's own `row_component` is kept).
 - **The payment panel lists the order's other payments** (e.g. the one rejected before), with their status, UTR and reason, and **the members' details** given at registration (e.g. *Priya Sen · ISC 2005*), when the event asked for them.
