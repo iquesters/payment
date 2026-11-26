@@ -33,6 +33,9 @@ class PaymentForms
             'endpoint' => '/pay/{uid}',
             'method' => 'POST',
             'submitButtonLabel' => 'Submit payment details',
+            'submittingLabel' => 'Sending',
+            // The pay page shows the message itself (flash).
+            'disableSnackbar' => true,
             'allowCancel' => false,
             'defaultFieldSize' => 12,
             'modes' => ['edit' => ['allowCancel' => false, 'allowDelete' => false]],

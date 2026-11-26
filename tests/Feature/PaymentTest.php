@@ -64,6 +64,33 @@ class PaymentTest extends TestCase
         $this->actingAs($this->memberOf($organisation))->get('/pay/'.$order->uid)->assertNotFound();
     }
 
+    public function test_the_same_item_twice_shows_once_with_its_count(): void
+    {
+        $organisation = $this->makeOrganisation();
+        $this->upi($organisation);
+        $buyer = $this->memberOf($organisation);
+        $pass = $this->makeProduct($organisation, ['name' => 'Pass', 'price' => 600]);
+        $child = $this->makeProduct($organisation, ['name' => 'Child', 'price' => 0]);
+        // One line per person (as an event registration makes them).
+        $order = app(\Iquesters\Commerce\Services\OrderService::class)->create($organisation, ['user_id' => $buyer->id, 'name' => 'Rahul'], [
+            ['product' => $pass, 'meta' => ['person' => 'Rahul']],
+            ['product' => $pass, 'meta' => ['person' => 'Priya', 'member_details' => ['summary' => 'ISC 2005']]],
+            ['product' => $child, 'meta' => ['person' => 'Tutun']],
+        ], ['prefix' => 'TTV-MEET']);
+
+        $this->actingAs($buyer)->get('/pay/'.$order->uid)->assertOk()
+            ->assertSee('2 × Pass')->assertDontSee('1 × Pass')->assertSee('1 × Child')
+            ->assertSee('INR 1,200.00');
+
+        // The admin's summary of the payment too.
+        $this->sendProof($order, $buyer)->assertOk();
+        $payment = Payment::query()->where('order_id', $order->id)->sole();
+        $this->actingAs($this->memberOf($organisation, 'admin'))->get('/payment/payments/'.$payment->uid.'/summary')->assertOk()
+            ->assertSee('2 × Pass')->assertDontSee('1 × Pass')->assertSee('1 × Child')
+            // A member's details given at registration (e.g. their batch).
+            ->assertSee('Members')->assertSee('Priya')->assertSee('ISC 2005');
+    }
+
     public function test_sending_proof_puts_the_order_under_review_and_a_used_utr_is_refused(): void
     {
         $organisation = $this->makeOrganisation();
@@ -129,6 +156,13 @@ class PaymentTest extends TestCase
         $this->actingAs($buyer)->get('/pay/'.$order->uid)->assertOk()->assertSee('Not in the statement yet');
         $this->sendProof($order, $buyer)->assertOk();
         $this->assertSame(Order::STATUS_UNDER_REVIEW, $order->fresh()->status);
+
+        // The list's row cards: waiting first, a coloured badge; the resend marked, the rejected one with its reason.
+        $rows = collect($this->actingAs($admin)->getJson('/payment/payments/data')->assertOk()->json('response_schema.data'));
+        $this->assertSame([['warning', '2nd attempt', null], ['danger', null, 'Not in the statement yet']], $rows->map(fn ($r) => [$r['status_tone'], $r['attempt_label'], $r['reason']])->all());
+        // The new one's panel lists the earlier, rejected payment.
+        $this->actingAs($admin)->get('/payment/payments/'.$rows[0]['uid'].'/summary')->assertOk()
+            ->assertSee('Other payments for TTV-MEET-0001')->assertSee('Rejected: Not in the statement yet');
     }
 
     public function test_an_admin_records_cash_by_reference(): void

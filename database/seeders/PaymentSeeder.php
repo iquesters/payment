@@ -2,6 +2,7 @@
 
 namespace Iquesters\Payment\Database\Seeders;
 
+use Illuminate\Support\Facades\DB;
 use Iquesters\Foundation\Database\Seeders\BaseSeeder;
 use Iquesters\Foundation\Models\Module;
 use Iquesters\Payment\Support\PaymentForms;
@@ -16,6 +17,8 @@ class PaymentSeeder extends BaseSeeder
     public const MODULE_ROLES = ['super-admin', 'admin'];
 
     public const PAYMENT_TABLE = 'payment-table';
+
+    public const ROW_COMPONENT = 'payment.summary';
 
     protected string $moduleName = 'payment';
 
@@ -38,6 +41,8 @@ class PaymentSeeder extends BaseSeeder
                         'entity' => 'payments',
                         'data_url' => '/payment/payments/data',
                         'create' => ['form' => PaymentForms::MARK_PAID, 'label' => 'Record a payment'],
+                        // Each row as a card: the order, a coloured status badge, amount, UTR, a rejection's reason.
+                        'row_component' => self::ROW_COMPONENT,
                         'record' => [
                             ['html' => '/payment/payments/{uid}/summary', 'title' => 'Payment'],
                             ['form' => PaymentForms::DECISION, 'mode' => 'edit', 'title' => 'Verify or reject', 'when' => ['is_open' => '1']],
@@ -82,5 +87,13 @@ class PaymentSeeder extends BaseSeeder
 
         // The module's form schemas (rebuilt on every seed).
         PaymentForms::syncAll();
+
+        // A table made before the row card: given it (an admin's own row_component is kept).
+        $table = DB::table('table_schemas')->where('slug', self::PAYMENT_TABLE)->first();
+        $schema = $table ? (array) json_decode((string) $table->schema, true) : null;
+        if ($schema !== null && empty($schema['row_component'])) {
+            $schema['row_component'] = self::ROW_COMPONENT;
+            DB::table('table_schemas')->where('id', $table->id)->update(['schema' => json_encode($schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), 'updated_at' => now()]);
+        }
     }
 }

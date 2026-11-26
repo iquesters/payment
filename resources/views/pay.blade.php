@@ -27,12 +27,13 @@
                 </div>
             </div>
             <ul class="list-unstyled small mt-3 mb-0">
-                @foreach ($order->lines as $line)
+                {{-- The same item at the same price once, with its count (2 × Membership 2027); the order keeps a line per person. --}}
+                @foreach ($order->groupedLines() as $line)
                     <li class="d-flex justify-content-between gap-2 py-1 border-top">
-                        <span>{{ $line->quantity }} × {{ $line->description }}</span>
+                        <span>{{ $line['quantity'] }} × {{ $line['description'] }}</span>
                         <span class="text-nowrap">
-                            @if ((float) $line->discount > 0)<s class="text-muted me-1">{{ $money((float) $line->unit_price * $line->quantity) }}</s>@endif
-                            {{ $money($line->line_total) }}
+                            @if ($line['full'] - $line['total'] > 0.004)<s class="text-muted me-1">{{ $money($line['full']) }}</s>@endif
+                            {{ $money($line['total']) }}
                         </span>
                     </li>
                 @endforeach
@@ -43,15 +44,13 @@
     @if ($order->isPaid())
         <div class="card border-0 shadow-sm">
             <div class="card-body small">
-                <p class="mb-2"><i class="fas fa-circle-check text-success me-1"></i>Paid. Thank you!</p>
-                @if ($returnUrl)<a href="{{ $returnUrl }}" class="btn btn-primary btn-sm">Done</a>@endif
+                <p class="mb-0"><i class="fas fa-circle-check text-success me-1"></i>Paid. Thank you!</p>
             </div>
         </div>
     @elseif ($order->status === \Iquesters\Commerce\Models\Order::STATUS_UNDER_REVIEW)
         <div class="card border-0 shadow-sm">
             <div class="card-body small">
-                <p class="mb-2"><i class="fas fa-hourglass-half text-info me-1"></i>We received your payment details. The organisers will check them against their bank statement; this page shows when it's done.</p>
-                @if ($returnUrl)<a href="{{ $returnUrl }}" class="btn btn-outline-primary btn-sm">Done</a>@endif
+                <p class="mb-0"><i class="fas fa-hourglass-half text-info me-1"></i>We received your payment details. The organisers will check them against their bank statement; this page shows when it's done.</p>
             </div>
         </div>
     @elseif ($order->isPayable())

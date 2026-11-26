@@ -25,7 +25,21 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  */
 class PaymentAdminController extends Controller
 {
+    /** Badge colours by status (Bootstrap text-bg-*). */
+    private const TONES = [
+        Payment::STATUS_SUBMITTED => 'warning',
+        Payment::STATUS_VERIFIED => 'success',
+        Payment::STATUS_REJECTED => 'danger',
+    ];
+
     public function __construct(private PaymentService $payments) {}
+
+    private static function ordinal(int $n): string
+    {
+        $suffix = in_array($n % 100, [11, 12, 13], true) ? 'th' : (['th', 'st', 'nd', 'rd'][$n % 10] ?? 'th');
+
+        return $n.$suffix;
+    }
 
     public function data(Request $request): JsonResponse
     {
@@ -144,6 +158,8 @@ class PaymentAdminController extends Controller
     {
         $order = $payment->order;
         $mismatch = $order && round((float) $payment->amount, 2) !== round((float) $order->total, 2);
+        // The how-many-th payment sent for this order (a resend after a rejection is the 2nd).
+        $attempt = $order ? Payment::query()->where('order_id', $order->id)->where('id', '<=', $payment->id)->count() : 1;
 
         return [
             'uid' => $payment->uid,
@@ -159,6 +175,12 @@ class PaymentAdminController extends Controller
             'organisation' => $payment->organisation?->name,
             'submitted_at' => $payment->created_at?->format('Y-m-d H:i'),
             'is_open' => $payment->status === Payment::STATUS_SUBMITTED ? '1' : '0',
+            // For the row card: a coloured badge, the reason of a rejection, a later attempt.
+            'status_tone' => self::TONES[$payment->status] ?? 'secondary',
+            'reason' => $payment->status === Payment::STATUS_REJECTED ? $payment->reason : null,
+            'attempt_label' => $attempt > 1 ? self::ordinal($attempt).' attempt' : null,
+            'mismatch_label' => $mismatch ? 'The amount differs from the order total' : null,
+            'submitted_at_label' => $payment->created_at?->format('j M, g:i A'),
         ];
     }
 }

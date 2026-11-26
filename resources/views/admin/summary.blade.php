@@ -52,10 +52,37 @@
         </div>
     @endif
 
+    {{-- Other payments sent for this order (e.g. one rejected before this one). --}}
+    @php($others = $order ? \Iquesters\Payment\Models\Payment::query()->where('order_id', $order->id)->where('id', '!=', $payment->id)->orderBy('id')->get() : collect())
+    @if ($others->isNotEmpty())
+        <div class="text-muted mb-1">Other payments for {{ $order->reference }}</div>
+        <ul class="list-unstyled mb-3">
+            @foreach ($others as $other)
+                <li class="mb-1">
+                    <span class="badge text-bg-{{ ['submitted' => 'warning', 'verified' => 'success', 'rejected' => 'danger'][$other->status] ?? 'secondary' }}">{{ $other->statusLabel() }}</span>
+                    {{ $other->created_at?->format('j M, g:i A') }}@if ($other->utr) · UTR <span class="font-monospace">{{ $other->utr }}</span>@endif · {{ $money($other->amount) }}
+                    @if ($other->reason)<div class="text-danger-emphasis">Rejected: {{ $other->reason }}</div>@endif
+                </li>
+            @endforeach
+        </ul>
+    @endif
+
+    {{-- What each member gave when the event asked (e.g. their batch: "ISC 2005"), from the order's lines. --}}
+    @php($members = $order ? $order->lines->filter(fn ($l) => ! empty(((array) $l->meta)['member_details']['summary'] ?? null))->map(fn ($l) => [((array) $l->meta)['person'] ?? $l->description, ((array) $l->meta)['member_details']['summary']])->values() : collect())
+    @if ($members->isNotEmpty())
+        <div class="text-muted mb-1">Members</div>
+        <ul class="list-unstyled mb-3">
+            @foreach ($members as [$who, $details])
+                <li>{{ $who }} <span class="text-muted">· {{ $details }}</span></li>
+            @endforeach
+        </ul>
+    @endif
+
     <div class="text-muted mb-1">Items</div>
     <ul class="list-unstyled mb-0">
-        @foreach ($order->lines as $line)
-            <li>{{ $line->quantity }} × {{ $line->description }} <span class="text-muted">· {{ $money($line->line_total) }}</span></li>
+        {{-- The same item at the same price once, with its count (who each is for: the order's record). --}}
+        @foreach ($order->groupedLines() as $line)
+            <li>{{ $line['quantity'] }} × {{ $line['description'] }} <span class="text-muted">· {{ $money($line['total']) }}</span></li>
         @endforeach
     </ul>
 </div>
