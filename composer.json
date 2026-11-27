@@ -37,6 +37,9 @@
     "laravel/pint": "^1.18",
     "larastan/larastan": "^3.0"
   },
+  "suggest": {
+    "iquesters/notifications": "Emails people when things happen (registration, payment, membership), with wording each organisation can edit"
+  },
   "repositories": [
     {
       "type": "path",

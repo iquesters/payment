@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added (emails, with iquesters/notifications)
+- **The payer gets an email** when their payment details are received (*under review*), when the payment is confirmed (verified, or recorded at the desk), and when it is not accepted (with the reason and the pay link). The messages are declared by `PaymentNotifications` and sent by the notifications module, whose templates each organisation can reword. Without that module nothing is sent (`suggest`).
+
+### Fixed
+- **Each member once in the payment panel**: a bundle's lines (the pass and the membership) both carry the member's details, so their batch showed twice.
+
 ## [1.0.0] – 2026-11-27
 
 ### Changed (the pay page)
