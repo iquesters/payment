@@ -13,6 +13,9 @@ class PaymentServiceProvider extends BaseServiceProvider
     {
         parent::boot();
 
+        // Its messages (payment details received, confirmed, not accepted), when notifications is installed.
+        \Iquesters\Payment\Support\PaymentNotifications::register();
+
         // The Payments list's rows (resources/views/records/payment/summary): only with
         // iquesters/user-interface, which renders them.
         $registry = 'Iquesters\UserInterface\Support\RecordComponents';

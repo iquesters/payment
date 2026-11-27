@@ -76,6 +76,8 @@ class PaymentTest extends TestCase
             ['product' => $pass, 'meta' => ['person' => 'Rahul']],
             ['product' => $pass, 'meta' => ['person' => 'Priya', 'member_details' => ['summary' => 'ISC 2005']]],
             ['product' => $child, 'meta' => ['person' => 'Tutun']],
+            // A bundle's second line for the same person (her membership) carries the same details.
+            ['product' => $this->makeProduct($organisation, ['name' => 'Membership 2027', 'price' => 0]), 'meta' => ['person' => 'Priya', 'member_details' => ['summary' => 'ISC 2005']]],
         ], ['prefix' => 'TTV-MEET']);
 
         $this->actingAs($buyer)->get('/pay/'.$order->uid)->assertOk()
@@ -85,7 +87,10 @@ class PaymentTest extends TestCase
         // The admin's summary of the payment too.
         $this->sendProof($order, $buyer)->assertOk();
         $payment = Payment::query()->where('order_id', $order->id)->sole();
-        $this->actingAs($this->memberOf($organisation, 'admin'))->get('/payment/payments/'.$payment->uid.'/summary')->assertOk()
+        $summary = $this->actingAs($this->memberOf($organisation, 'admin'))->get('/payment/payments/'.$payment->uid.'/summary');
+        // Each member once (not once per line of their bundle).
+        $this->assertSame(1, substr_count($summary->getContent(), 'ISC 2005'));
+        $summary->assertOk()
             ->assertSee('2 × Pass')->assertDontSee('1 × Pass')->assertSee('1 × Child')
             // A member's details given at registration (e.g. their batch).
             ->assertSee('Members')->assertSee('Priya')->assertSee('ISC 2005');

@@ -67,8 +67,9 @@
         </ul>
     @endif
 
-    {{-- What each member gave when the event asked (e.g. their batch: "ISC 2005"), from the order's lines. --}}
-    @php($members = $order ? $order->lines->filter(fn ($l) => ! empty(((array) $l->meta)['member_details']['summary'] ?? null))->map(fn ($l) => [((array) $l->meta)['person'] ?? $l->description, ((array) $l->meta)['member_details']['summary']])->values() : collect())
+    {{-- What each member gave when the event asked (e.g. their batch: "ISC 2005"), once per person
+         (a bundle's lines, the pass and the membership, each carry it). --}}
+    @php($members = $order ? $order->lines->filter(fn ($l) => ! empty(((array) $l->meta)['member_details']['summary'] ?? null))->map(fn ($l) => [((array) $l->meta)['person'] ?? $l->description, ((array) $l->meta)['member_details']['summary']])->unique(fn ($m) => $m[0].'|'.$m[1])->values() : collect())
     @if ($members->isNotEmpty())
         <div class="text-muted mb-1">Members</div>
         <ul class="list-unstyled mb-3">

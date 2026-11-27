@@ -2,6 +2,7 @@
 
 namespace Iquesters\Payment\Services;
 
+use Iquesters\Payment\Support\PaymentNotifications;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Iquesters\Commerce\Models\Order;
@@ -61,6 +62,7 @@ class PaymentService
             return $payment;
         });
         static::logInfo('Payment proof sent', ['order' => $order->reference, 'payment' => $payment->uid]);
+        PaymentNotifications::send('payment.under_review', $payment);
 
         return $payment->fresh();
     }
@@ -76,6 +78,7 @@ class PaymentService
             $this->orders->markPaid($payment->order, 'Payment verified'.($payment->utr ? " (UTR {$payment->utr})" : ''), $adminId);
         });
         static::logInfo('Payment verified', ['payment' => $payment->uid, 'by' => $adminId]);
+        PaymentNotifications::send('payment.verified', $payment);
 
         return $payment->fresh();
     }
@@ -91,6 +94,7 @@ class PaymentService
             $this->orders->reject($payment->order, $reason, $adminId);
         });
         static::logInfo('Payment rejected', ['payment' => $payment->uid, 'by' => $adminId]);
+        PaymentNotifications::send('payment.rejected', $payment->fresh());
 
         return $payment->fresh();
     }
@@ -131,6 +135,7 @@ class PaymentService
             return $payment;
         });
         static::logInfo('Payment recorded by an admin', ['order' => $order->reference, 'kind' => $kind, 'by' => $adminId]);
+        PaymentNotifications::send('payment.verified', $payment);
 
         return $payment;
     }
