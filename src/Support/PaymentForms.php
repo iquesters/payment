@@ -101,7 +101,7 @@ class PaymentForms
             'fields' => [
                 ['id' => 'upi', 'type' => 'section', 'label' => 'UPI', 'description' => 'People pay by scanning a QR with the exact amount and the order reference. A person\'s UPI ID is fine until the organisation\'s bank account is ready.'],
                 ['id' => 'upi_enabled', 'label' => 'Take payments by UPI', 'type' => 'checkbox'],
-                ['id' => 'upi_id', 'label' => 'UPI ID', 'type' => 'text', 'maxLength' => 256, 'placeholder' => 'e.g. name@okaxis'],
+                ['id' => 'upi_id', 'label' => 'UPI ID', 'type' => 'text', 'maxLength' => 256, 'placeholder' => 'e.g. name@okaxis or 9876543210@ybl'],
                 ['id' => 'payee_name', 'label' => 'Payee name (as in the UPI app)', 'type' => 'text', 'maxLength' => 100],
                 ['id' => 'instructions', 'label' => 'Instructions shown with the QR', 'type' => 'textarea', 'rows' => 2, 'maxLength' => 1000],
                 ['id' => 'desk', 'type' => 'section', 'label' => 'At the desk', 'description' => 'Admins record these payments themselves (Payments → Record a payment).'],
