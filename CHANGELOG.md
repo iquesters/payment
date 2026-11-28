@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+- The payment settings page says *orders (event registrations, memberships)* instead of *event tickets*, so it fits apps that call them passes.
+
 ### Fixed
 - **"Open in a UPI app" and the QR work in Google Pay**: the link wrote the UPI ID's `@` as `%40` (`name%40okaxis`), which Google Pay showed as is and the payment failed. `@` is now written as is; spaces and other characters stay encoded.
 - **A mobile-number UPI ID** (e.g. `9876543210@ybl`) works as before; typed with spaces or capitals (`98765 43210@YBL`) it is now tidied when saved (and in the link) instead of being refused. The field's hint shows both forms.
