@@ -47,9 +47,14 @@ class PaymentTest extends TestCase
         $organisation = $this->makeOrganisation();
         $order = $this->makeOrder($organisation, null, 1200);
 
-        $this->assertSame('upi://pay?pa=ttv.alumni%40okaxis&pn=TTV%20Alumni&am=1200.00&cu=INR&tn=TTV-MEET-0001', UpiLink::for($this->upi($organisation), $order));
+        // "@" as written: UPI apps (Google Pay) don't decode %40 and the payment fails.
+        $this->assertSame('upi://pay?pa=ttv.alumni@okaxis&pn=TTV%20Alumni&am=1200.00&cu=INR&tn=TTV-MEET-0001', UpiLink::for($this->upi($organisation), $order));
         $this->assertTrue(UpiLink::isValidId('rahul.sen@okaxis'));
         $this->assertFalse(UpiLink::isValidId('rahul sen'));
+        // A mobile-number UPI ID works; typed with spaces or capitals, it's tidied first.
+        $this->assertTrue(UpiLink::isValidId('9876543210@ybl'));
+        $this->assertSame('9876543210@ybl', UpiLink::normalise(' 98765 43210@YBL '));
+        $this->assertFalse(UpiLink::isValidId('9876543210'));
     }
 
     public function test_the_buyer_sees_the_pay_page_and_others_do_not(): void

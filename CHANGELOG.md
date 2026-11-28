@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+- **"Open in a UPI app" and the QR work in Google Pay**: the link wrote the UPI ID's `@` as `%40` (`name%40okaxis`), which Google Pay showed as is and the payment failed. `@` is now written as is; spaces and other characters stay encoded.
+- **A mobile-number UPI ID** (e.g. `9876543210@ybl`) works as before; typed with spaces or capitals (`98765 43210@YBL`) it is now tidied when saved (and in the link) instead of being refused. The field's hint shows both forms.
+
+## [1.1.0] - 2026-11-27
+
 ### Added (emails, with iquesters/notifications)
 - **The payer gets an email** when their payment details are received (*under review*), when the payment is confirmed (verified, or recorded at the desk), and when it is not accepted (with the reason and the pay link). The messages are declared by `PaymentNotifications` and sent by the notifications module, whose templates each organisation can reword. Without that module nothing is sent (`suggest`).
 

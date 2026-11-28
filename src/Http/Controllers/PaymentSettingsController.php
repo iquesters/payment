@@ -65,8 +65,10 @@ class PaymentSettingsController extends Controller
             'cash_enabled' => ['nullable', 'boolean'],
             'refund_policy' => ['nullable', 'string', 'max:5000'],
         ]);
-        if (! empty($data['upi_id']) && ! UpiLink::isValidId($data['upi_id'])) {
-            return response()->json(['success' => false, 'message' => 'Check the UPI ID.', 'errors' => ['upi_id' => ['A UPI ID looks like name@bank (e.g. rahul.sen@okaxis).']]], 422);
+        // Spaces dropped and lower case: "98765 43210@YBL" is saved as 9876543210@ybl.
+        $data['upi_id'] = UpiLink::normalise($data['upi_id'] ?? '');
+        if ($data['upi_id'] !== '' && ! UpiLink::isValidId($data['upi_id'])) {
+            return response()->json(['success' => false, 'message' => 'Check the UPI ID.', 'errors' => ['upi_id' => ['A UPI ID looks like name@bank or mobile@bank (e.g. rahul.sen@okaxis or 9876543210@ybl).']]], 422);
         }
 
         $userId = (int) $request->user()->id;
