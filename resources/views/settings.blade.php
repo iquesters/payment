@@ -9,7 +9,7 @@
             <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
                 <div>
                     <h5 class="fs-6 mb-1">Payment settings of {{ $organisation->name }}</h5>
-                    <p class="text-muted small mb-0">How people pay this organisation's orders (event tickets, memberships).</p>
+                    <p class="text-muted small mb-0">How people pay this organisation's orders (event registrations, memberships).</p>
                 </div>
                 @if ($organisations->count() > 1)
                     <select class="form-select form-select-sm w-auto" aria-label="Organisation" onchange="if (this.value) window.location = this.value">
